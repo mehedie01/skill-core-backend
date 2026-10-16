@@ -1,0 +1,30 @@
+databases:
+  - name: skill-core-db
+    databaseName: skillcoredb
+    user: skillcore
+    plan: free
+    region: singapore
+
+services:
+  - type: web
+    name: skill-core-api
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: skill-core-db
+          property: connectionString
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://skill-core-solution.vercel.app"
