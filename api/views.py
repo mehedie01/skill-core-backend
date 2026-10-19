@@ -1,6 +1,8 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Service, Contact, Project, BlogPost
 from .serializers import (
@@ -10,6 +12,7 @@ from .serializers import (
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def api_root(request):
     return Response({
         'message': 'SKILL CORE SOLUTION — API v1',
@@ -24,6 +27,7 @@ def api_root(request):
 
 # ============ SERVICES ============
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def service_list(request):
     services = Service.objects.filter(is_active=True)
     serializer = ServiceSerializer(services, many=True)
@@ -32,6 +36,7 @@ def service_list(request):
 
 # ============ CONTACT ============
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def contact_create(request):
     serializer = ContactSerializer(data=request.data)
     if serializer.is_valid():
@@ -51,6 +56,7 @@ def contact_create(request):
 
 # ============ PROJECTS ============
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def project_list(request):
     category = request.query_params.get('category')
     projects = Project.objects.filter(is_active=True)
@@ -65,6 +71,7 @@ def project_list(request):
 
 # ============ BLOG ============
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def blog_list(request):
     category = request.query_params.get('category')
     posts = BlogPost.objects.filter(is_published=True)
@@ -78,6 +85,7 @@ def blog_list(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def blog_detail(request, pk):
     try:
         post = BlogPost.objects.get(pk=pk, is_published=True)
@@ -88,3 +96,11 @@ def blog_detail(request, pk):
         )
     serializer = BlogPostSerializer(post, context={'request': request})
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def blog_categories(request):
+    categories = BlogPost.objects.filter(is_published=True).values_list('category', flat=True).distinct()
+    return Response({'categories': list(categories)})
+    
